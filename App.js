@@ -19,12 +19,16 @@ import AddTask from "./Pages/AddTask";
 import Navigation from "./Navigation";
 import TasksPages from "./Pages/TasksPages";
 import TasksProvider, { TasksContext } from "./Context/TasksContext";
+import {Provider} from "react-redux"
+import  store  from "./State/store";
 
 export default function App() {
   return (
+    <Provider store={store}>
     <TasksProvider>
       <Navigation />
     </TasksProvider>
+    </Provider>
   );
 }
 

@@ -3,16 +3,23 @@ import React, { useContext, useEffect, useState } from "react";
 import { TouchableOpacity, FlatList, ScrollView } from "react-native";
 import ToDoTaskCard from "../Components/ToDoTaskCard/ToDoTaskCard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TasksContext } from "../Context/TasksContext";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  addDoneTasks,
+  addInProgressTasks,
+  emptyFilteredTasks,
+} from "../State/filteredTasks/filteredTasksSlice";
 const windowWidth = Dimensions.get("window").width;
+
 export default function TasksPages() {
-  const { tasks, setTasks } = useContext(TasksContext);
-  const [filteredTasks, setFilteredTasks] = useState([]);
+  const tasks = useSelector((state) => state.tasks.value);
+  const filteredTasks = useSelector((state) => state.filteredTasks.value);
+  const dispatch = useDispatch();
   const [emptyFilterText, setEmptyFilterText] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
   function handleInProgressFilter() {
-    setFilteredTasks([]);
+    dispatch(emptyFilteredTasks());
     setEmptyFilterText("");
     setActiveFilter("InProgress");
 
@@ -20,23 +27,32 @@ export default function TasksPages() {
     if (newFilteredTasks.length == 0) {
       return setEmptyFilterText("No In Progress Tasks To Be Shown");
     }
-    setFilteredTasks(newFilteredTasks);
+    dispatch(addInProgressTasks(tasks));
   }
   function handleDoneFilter() {
-    setFilteredTasks([]);
+    dispatch(emptyFilteredTasks());
     setEmptyFilterText("");
     setActiveFilter("Done");
     const newFilteredTasks = tasks.filter((task) => task.status == true);
     if (newFilteredTasks.length == 0) {
       return setEmptyFilterText("No Done Tasks To Be Shown");
     }
-    setFilteredTasks(newFilteredTasks);
+    dispatch(addDoneTasks(tasks));
   }
   function handleAllFilter() {
-    setFilteredTasks([]);
+    dispatch(emptyFilteredTasks());
     setEmptyFilterText("");
     setActiveFilter("All");
   }
+  useEffect(() => {
+    if (activeFilter == "Done") {
+      dispatch(addDoneTasks(tasks));
+    } else if (activeFilter == "InProgress") {
+      dispatch(addInProgressTasks(tasks));
+    } else {
+      dispatch(emptyFilteredTasks());
+    }
+  }, [tasks]);
 
   return (
     <View style={styles.container}>
@@ -88,11 +104,13 @@ export default function TasksPages() {
             {emptyFilterText}
           </Text>
         ) : (
-          <FlatList
-            contentContainerStyle={{ padding: 15 }}
-            data={filteredTasks.length > 0 ? filteredTasks : tasks}
-            renderItem={({ item }) => <ToDoTaskCard item={item} />}
-          />
+          <ScrollView>
+            {filteredTasks.length > 0
+              ? filteredTasks.map((task) => (
+                  <ToDoTaskCard key={task.id} item={task} />
+                ))
+              : tasks.map((task) => <ToDoTaskCard key={task.id} item={task} />)}
+          </ScrollView>
         )}
       </View>
     </View>
@@ -121,7 +139,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
-   
   },
   filtrationButtonsView: {
     width: "90%",

@@ -6,39 +6,29 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { TasksContext } from "../Context/TasksContext";
+import { editTask } from "../State/Tasks/tasksSlice";
+import { useDispatch } from "react-redux";
 const windowWidth = Dimensions.get("window").width;
 
 const EditComponent = () => {
-  const navigator=useNavigation()
-  const { tasks, setTasks } = useContext(TasksContext);
+  const navigator = useNavigation();
   const { params } = useRoute();
   const { id, title, description, priority, status } = params.item;
   const [taskTitle, setTaskTitle] = useState(title);
   const [taskDescription, setTaskDescription] = useState(description);
   const [taskPriority, setTaskPriority] = useState(priority);
   const [taskStatus, setTaskStatus] = useState(status);
-
+  
+  const dispatch = useDispatch();
   function handleEditing(id) {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              status: task.status,
-              title: taskTitle,
-              description: taskDescription,
-              priority: taskPriority,
-              status: taskStatus,
-            }
-          : task
-      )
+    dispatch(
+      editTask({ id, taskTitle, taskDescription, taskPriority, taskStatus })
     );
-navigator.navigate('Task')
-     
+
+    navigator.navigate("Task");
   }
   return (
     <View style={styles.AddTaskView}>
@@ -78,9 +68,11 @@ navigator.navigate('Task')
         <Text style={styles.pickerText}>Status :</Text>
         <View style={styles.priorityContainer}>
           <Picker
-            selectedValue={taskStatus}
+            selectedValue={taskStatus ? "Done" : "InProgress"}
             style={styles.picker}
-            onValueChange={(itemValue) => setTaskStatus(itemValue)}
+            onValueChange={(itemValue) =>
+              itemValue == "Done" ? setTaskStatus(true) : setTaskStatus(false)
+            }
           >
             <Picker.Item label="Done" value="Done" />
             <Picker.Item label="In Progress" value="InProgress" />
@@ -89,7 +81,11 @@ navigator.navigate('Task')
       </View>
 
       <View style={styles.buttonsView}>
-        <TouchableOpacity style={styles.addButton} activeOpacity={0.7} onPress={()=>handleEditing(id)}>
+        <TouchableOpacity
+          style={styles.addButton}
+          activeOpacity={0.7}
+          onPress={() => handleEditing(id)}
+        >
           <Text style={styles.addText}>Confirm</Text>
         </TouchableOpacity>
       </View>

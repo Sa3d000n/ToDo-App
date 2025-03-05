@@ -1,32 +1,26 @@
 import { StyleSheet, Text, View, Pressable, Dimensions } from "react-native";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { TasksContext } from "../../Context/TasksContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useDispatch, useSelector } from "react-redux";
+import { changeStatus, deleteTask } from "../../State/Tasks/tasksSlice";
+import { changeFilteredTasksStatus, deleteFilteredTasksTask } from "../../State/filteredTasks/filteredTasksSlice";
 const windowWidth = Dimensions.get("window").width;
 
 export default function ToDoTaskCard({ item }) {
-  const [status, setStatus] = useState(item.status);
-  const { tasks, setTasks } = useContext(TasksContext);
-
+  const dispatch = useDispatch();
   const { navigate } = useNavigation();
-  function handleStatus(id) {
-    setStatus((perv) => !perv);
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, status: !task.status } : task
-      )
-    );
-  }
-
-  function handleDelete(id) {
-    const newTasks = tasks.filter((task) => {
-      return task.id !== id;
-    });
-    setTasks(newTasks);
-  }
+function handleDelete(id){
+  dispatch(deleteTask(id))
+  dispatch(deleteFilteredTasksTask(id))
+}
+function handleStatusChanging(id){
+  dispatch(changeStatus(id))
+  dispatch(changeFilteredTasksStatus(id))
+}
   return (
     <View style={styles.taskView}>
       <Pressable
@@ -34,23 +28,23 @@ export default function ToDoTaskCard({ item }) {
           navigate("ToDoTaskDetails", { item });
         }}
       >
-        <Text numberOfLines={1} ellipsizeMode="tail" >
+        <Text numberOfLines={1} ellipsizeMode="tail">
           {item.title}
         </Text>
       </Pressable>
       <View style={{ flexDirection: "row", gap: 12 }}>
         <Pressable
           onPress={() => {
-            handleStatus(item.id);
+            handleStatusChanging(item.id);
           }}
         >
-          {status ? (
+          {item.status ? (
             <FontAwesome name="check-circle" size={24} color="green" />
           ) : (
             <Feather name="circle" size={24} color="black" />
           )}
         </Pressable>
-        <Pressable onPress={() => handleDelete(item.id)}>
+        <Pressable onPress={() =>handleDelete(item.id) }>
           <AntDesign name="delete" size={24} color="red" />
         </Pressable>
       </View>
@@ -76,6 +70,6 @@ const styles = StyleSheet.create({
     elevation: 10,
     marginVertical: 10,
     width: windowWidth * 0.9,
-    flexWrap:"wrap"
+    flexWrap: "wrap",
   },
 });

@@ -9,6 +9,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ToDoTaskDetails from "./homeStack/ToDoTaskDetails";
 import EditComponent from "./Pages/EditComponent";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import QuotesComponent from "./Pages/QuotesComponent";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -34,12 +36,18 @@ function BottomTab() {
           if (route.name == "Add Task") {
             return <MaterialIcons name="add-task" size={size} color={color} />;
           }
+          if (route.name == "Quotes") {
+            return (
+              <Ionicons name="chatbubble-ellipses" size={size} color={color} />
+            );
+          }
         },
         headerShown: false,
       })}
     >
       <Tab.Screen name="Tasks" component={StackGroup} />
       <Tab.Screen name="Add Task" component={AddTask} />
+      <Tab.Screen name="Quotes" component={QuotesComponent} />
     </Tab.Navigator>
   );
 }

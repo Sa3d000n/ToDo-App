@@ -13,6 +13,8 @@ import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { TasksContext } from "../Context/TasksContext";
+import { useDispatch, useSelector } from "react-redux";
+import { addTask } from "../State/Tasks/tasksSlice";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -21,8 +23,9 @@ export default function AddTask() {
   const [taskDescription, setTaskDescription] = useState("");
   const [priority, setPriority] = useState("Low");
   const navigation = useNavigation();
-  const { tasks, setTasks } = useContext(TasksContext);
 
+  const tasks = useSelector((state) => state.tasks.value);
+  const dispatch = useDispatch();
   const handleReset = () => {
     setTaskTitle("");
     setTaskDescription("");
@@ -33,6 +36,10 @@ export default function AddTask() {
       alert("Please enter a task title!");
       return;
     }
+    if (!taskDescription.trim()) {
+      alert("Please enter a task description!");
+      return;
+    }
     const newTask = {
       id: tasks.length + 1,
       title: taskTitle,
@@ -40,8 +47,8 @@ export default function AddTask() {
       priority: priority,
       status: false,
     };
-
-    setTasks((pervTask) => [newTask, ...pervTask]);
+    console.log(newTask)
+    dispatch(addTask(newTask));
     navigation.navigate("Tasks");
     handleReset();
   };

@@ -7,19 +7,21 @@ import {
 } from "react-native";
 import React, { useContext } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import Icon from "react-native-vector-icons/MaterialIcons"; // For icons
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { TasksContext } from "../Context/TasksContext";
+import { useDispatch } from "react-redux";
+import { deleteTask } from "../State/Tasks/tasksSlice";
 
 const ToDoTaskDetails = () => {
   const route = useRoute();
-  const { tasks, setTasks } = useContext(TasksContext);
+  const dispatch = useDispatch();
   const { params } = route;
   const navigation = useNavigation();
-  const {item}= params
+  const { item } = params;
   const { title, description, id, status, priority } = params.item;
 
   function handleDelete(id) {
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+    dispatch(deleteTask(id));
     navigation.goBack();
   }
   let color;
@@ -79,7 +81,7 @@ const ToDoTaskDetails = () => {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.editButton]}
-            onPress={() => navigation.navigate("EditTask",{ item })}
+            onPress={() => navigation.navigate("EditTask", { item })}
           >
             <Icon name="edit" size={18} color="#FFF" />
             <Text style={styles.buttonText}>Edit Task</Text>
